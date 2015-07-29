@@ -45,7 +45,7 @@ public class CrimeLab {
         for (int i = 0; i < 100; i++) {
             Crime c = new Crime();
             c.setTitle("Crime #" + i);
-            c.setDate(new Date());
+            c.setDate(new Date(1000*86400*i));
             c.setSolved(i % 2 == 0); // Every other one
             mCrimes.add(c);
         }

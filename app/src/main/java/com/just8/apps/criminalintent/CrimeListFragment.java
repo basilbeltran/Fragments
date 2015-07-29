@@ -1,5 +1,6 @@
 package com.just8.apps.criminalintent;
 
+import android.content.Intent;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
  * BB
  * Created by kandinski on 2015-07-21.
  */
-public class CrimeListFragment extends ListFragment {
+public class CrimeListFragment extends ListFragment {                                   // A LIST WITH ADAPTER
     private static final String TAG = "CrimeListFragment";
 
     private ArrayList<Crime> mCrimes;
@@ -27,34 +28,23 @@ public class CrimeListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
 
         getActivity().setTitle(R.string.crimes_title);
-
         mCrimes = CrimeLab.get(getActivity()).getCrimes();
 
 /*        ArrayAdapter<Crime> adapter = new ArrayAdapter<Crime>(
                 getActivity(),
-                android.R.layout.simple_list_item_1,  // can only be used for single textView
+                android.R.layout.simple_list_item_1,              // ONLY GOOD for SINGLE SIMPLE TEXTVIEW
                 mCrimes);*/
         CrimeAdapter adapter = new CrimeAdapter(mCrimes);
-        setListAdapter(adapter);
+        setListAdapter(adapter);                                                        // ListFragment METHOD
     }
 
-
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id){
-        // Crime lCrime = (Crime) getListAdapter().getItem(position);
-        Crime lCrime = ((CrimeAdapter)getListAdapter()).getItem(position); // what guarantees Crime?
-        Log.i(TAG, "CRIME SELECTED = " + lCrime.getTitle());
-    }
-
-
-    private class CrimeAdapter extends ArrayAdapter<Crime> {
+private class CrimeAdapter extends ArrayAdapter<Crime> {                                //ADAPTER MEDIATES VIEW AND DATA
         public CrimeAdapter(ArrayList<Crime> crimes) {
             super(getActivity(), 0, crimes);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent){
+        public View getView(int position, View convertView, ViewGroup parent){          // CrimeAdapter.getView INFLATES, POPULATES
             if (convertView == null) {
                 convertView = getActivity().getLayoutInflater()
                         .inflate(R.layout.list_item_crime, null);
@@ -71,10 +61,25 @@ public class CrimeListFragment extends ListFragment {
                     (CheckBox)convertView.findViewById(R.id.crime_list_item_solvedCheckBox);
             solvedCheckBox.setChecked(c.isSolved());
 
-        return convertView;
+            return convertView;
         }
     }
 
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id){                             // ListFragment METHOD
+        // Crime lCrime = (Crime) getListAdapter().getItem(position);
+        Crime c = ((CrimeAdapter)getListAdapter()).getItem(position); // what guarantees Crime?
+        Log.d(TAG, "CRIME SELECTED = " + c.getTitle());
+        //Intent i = new Intent(getActivity(), CrimeActivity.class);  replaced with CrimePagerActivity
+        Intent i = new Intent(getActivity(), CrimePagerActivity.class);                                 // CALL *PAGER* INTENT WITH ID
+        i.putExtra(CrimeFragment.EXTRA_CRIME_ID, c.getId());
+        startActivity(i);
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((CrimeAdapter)getListAdapter()).notifyDataSetChanged();
+    }
 
 }

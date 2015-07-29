@@ -2,10 +2,15 @@ package com.just8.apps.criminalintent;
 
 import android.support.v4.app.Fragment;
 
-public class CrimeActivity extends SingleFragmentActivity {
+import java.util.UUID;
+
+public class CrimeActivity extends SingleFragmentActivity {    //CrimeActivity NOT CURRENTLY USED IN FAVOR OF CRIME PAGER ACTIVITY
 
     @Override
     protected Fragment createFragment() {
-        return new CrimeFragment();
+
+        UUID crimeId = (UUID)getIntent()
+                .getSerializableExtra(CrimeFragment.EXTRA_CRIME_ID);
+        return CrimeFragment.newInstance(crimeId);
     }
 }

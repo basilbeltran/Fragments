@@ -18,7 +18,7 @@ public class CrimeLab {
     private CrimeLab(Context appContext) {
         mAppContext = appContext;
         mCrimes = new ArrayList();
-        populate();
+        //populate();
     }
 
     public static CrimeLab get(Context c) {
@@ -41,8 +41,12 @@ public class CrimeLab {
         return null;
     }
 
+    public void addCrime(Crime c) {
+        mCrimes.add(c);
+    }
+
     private void populate(){
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 2; i++) {
             Crime c = new Crime();
             c.setTitle("Crime #" + i);
             c.setDate(new Date(1000*86400*i));

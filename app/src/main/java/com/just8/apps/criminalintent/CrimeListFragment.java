@@ -2,17 +2,19 @@ package com.just8.apps.criminalintent;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
@@ -50,15 +52,57 @@ public class CrimeListFragment extends ListFragment {                           
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup parent,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, parent, savedInstanceState);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             if (mSubtitleVisible) {
                 getActivity().getActionBar().setSubtitle(R.string.subtitle);
             }
         }
-        return v; }
+
+        ListView listView = (ListView)v.findViewById(android.R.id.list);
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+
+        listView.setMultiChoiceModeListener(    new AbsListView.MultiChoiceModeListener() {
+
+            public void onItemCheckedStateChanged(ActionMode mode, int position,
+                                                  long id, boolean checked) {
+                // Required, but not used in this implementation
+            }
+            // ActionMode.Callback methods
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                MenuInflater inflater = mode.getMenuInflater();
+                inflater.inflate(R.menu.crime_list_item_context, menu);
+                return true;
+            }
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+                // Required, but not used in this implementation
+            }
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_item_delete_crime:
+                        CrimeAdapter adapter = (CrimeAdapter)getListAdapter();
+                        CrimeLab crimeLab = CrimeLab.get(getActivity());
+                        for (int i = adapter.getCount() - 1; i >= 0; i--) {
+                            if (getListView().isItemChecked(i)) {
+                                crimeLab.deleteCrime(adapter.getItem(i));
+                            }
+                        }
+                        mode.finish();
+                        adapter.notifyDataSetChanged();
+                        return true;
+                    default:
+                        return false;
+                } }
+            public void onDestroyActionMode(ActionMode mode) {
+                // Required, but not used in this implementation
+            }
+        });
+
+        return v;
+    }
 
 private class CrimeAdapter extends ArrayAdapter<Crime> {                                //ADAPTER MEDIATES VIEW AND DATA
         public CrimeAdapter(ArrayList<Crime> crimes) {
@@ -134,6 +178,23 @@ private class CrimeAdapter extends ArrayAdapter<Crime> {                        
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        getActivity().getMenuInflater().inflate(R.menu.crime_list_item_context, menu);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void startCrimePager(UUID id){
         Intent i = new Intent(getActivity(), CrimePagerActivity.class);

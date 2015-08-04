@@ -1,6 +1,7 @@
 package com.just8.apps.criminalintent;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,14 +11,24 @@ import java.util.UUID;
  * BB
  * Created by kandinski on 2015-07-21.
  */
-public class CrimeLab {
+public class CrimeLab {       private static final String TAG = "CrimeLab";
+
     private static CrimeLab sCrimeLab;
+    private CriminalIntentJSONSerializer mSerializer;
+
     private Context mAppContext;
+    private static final String FILENAME = "crimes.json";
     private ArrayList<Crime> mCrimes;
 
     private CrimeLab(Context appContext) {
         mAppContext = appContext;
-        mCrimes = new ArrayList();
+        mSerializer = new CriminalIntentJSONSerializer(mAppContext, FILENAME);
+        try {
+            mCrimes = mSerializer.loadCrimes();
+        } catch (Exception e) {
+            mCrimes = new ArrayList<Crime>();
+            Log.e(TAG, "Error loading crimes: ", e);
+        }
         //populate();
     }
 
@@ -43,6 +54,17 @@ public class CrimeLab {
 
     public void addCrime(Crime c) {
         mCrimes.add(c);
+    }
+
+    public boolean saveCrimes() {
+        try {
+            mSerializer.saveCrimes(mCrimes);
+            Log.d(TAG, "crimes saved to file");
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving crimes: ", e);
+            return false;
+        }
     }
 
     private void populate(){
